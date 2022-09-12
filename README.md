@@ -6,9 +6,9 @@ Generate CSV files from any of these data sources: _PHP arrays_, _Laravel Collec
 
 This project was inspired on https://github.com/maatwebsite/Laravel-Excel which is a great project and can handle many formats (Excel, PDF, OpenOffice and CSV). But since it uses PhpSpreadsheet, it is not optimized for exporting large CSV files (thousands of records) causing the PHP memory exhaustion.
 
-The memory usage is optimized in this project by retrieving small chunks of results at a time and outputting the CSV content directly to the client browser or to a persistent with the use of [PHP streams](https://www.php.net/manual/en/intro.stream.php).
+The memory usage is optimized in this project by retrieving small chunks of results at a time and outputting the CSV content directly to the client browser or to a persistent file with the use of [PHP streams](https://www.php.net/manual/en/intro.stream.php).
 
-This project is using some of Laravel-Excel design principles because it is both a solid work and a reference, and by doing that, it also reduces the learning curve and adaption to this library.
+This project is using some of Laravel-Excel design principles because it is both a solid work and a reference, and by doing that, it also reduces the learning curve and adoption to this library.
 
 # Requirements
 * PHP >= 7.4
@@ -42,7 +42,7 @@ class UsersExport implements FromQuery
 {
     use Exportable;
     
-    public function query();
+    public function query()
     {
         return User::query();
     }
@@ -74,6 +74,92 @@ $filename = CsvHelper::filename();
     ->chain([
         new NotifyCsvCreated($filename)
     ]);
+```
+
+# Data sources
+
+## Laravel Eloquent Query Builder
+```php
+namespace App\Exports;
+
+use App\User;
+use Vitorccs\LaravelCsv\Concerns\Exportable;
+use Vitorccs\LaravelCsv\Concerns\FromQuery;
+
+class MyQueryExport implements FromQuery
+{
+    use Exportable;
+    
+    public function query()
+    {
+        return User::query();
+    }
+}
+```
+
+## Laravel Database Query Builder
+```php
+namespace App\Exports;
+
+use App\User;
+use Vitorccs\LaravelCsv\Concerns\Exportable;
+use Vitorccs\LaravelCsv\Concerns\FromQuery;
+use Illuminate\Support\Facades\DB;
+
+class MyQueryExport implements FromQuery
+{
+    use Exportable;
+    
+    public function query()
+    {
+        return DB::table('users');
+    }
+}
+```
+
+## Laravel Collection 
+```php
+namespace App\Exports;
+
+use Illuminate\Support\Collection;
+use Vitorccs\LaravelCsv\Concerns\Exportable;
+use Vitorccs\LaravelCsv\Concerns\FromCollection;
+
+class MyCollectionExport implements FromCollection
+{
+    use Exportable;
+    
+    public function collection(): Collection
+    {
+        return collect([
+            ['a1', 'b1', 'c1'],
+            ['a2', 'b2', 'c2'],
+            ['a3', 'b3', 'c3']
+        ]);
+    }
+}
+```
+
+## PHP Arrays
+```php
+namespace App\Exports;
+
+use Vitorccs\LaravelCsv\Concerns\Exportable;
+use Vitorccs\LaravelCsv\Concerns\FromArray;
+
+class MyArrayExport implements FromArray
+{
+    use Exportable;
+    
+    public function array(): array
+    {
+        return [
+            ['a1', 'b1', 'c1'],
+            ['a2', 'b2', 'c2'],
+            ['a3', 'b3', 'c3']
+        ];
+    }
+}
 ```
 
 # Implementations
