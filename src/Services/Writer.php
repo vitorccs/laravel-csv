@@ -129,7 +129,7 @@ class Writer
 
                 try {
                     if (!is_string($column)) {
-                        $column = (string)$column;
+                        if(is_array($column)) $column = json_encode($column); else $column = (string)$column; //if row has array data then json encode it
                     }
                 } catch (\Throwable $e) {
                     throw new InvalidCellValueException("{$columnLetter}{$iRow}");
