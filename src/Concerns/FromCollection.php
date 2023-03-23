@@ -3,11 +3,12 @@
 namespace Vitorccs\LaravelCsv\Concerns;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 
 interface FromCollection
 {
     /**
-     * @return Collection
+     * @return Collection|LazyCollection
      */
-    public function collection(): Collection;
+    public function collection();
 }
