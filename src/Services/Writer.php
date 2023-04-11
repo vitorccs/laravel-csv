@@ -4,9 +4,11 @@ namespace Vitorccs\LaravelCsv\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Throwable;
 use Vitorccs\LaravelCsv\Concerns\FromArray;
 use Vitorccs\LaravelCsv\Concerns\FromCollection;
 use Vitorccs\LaravelCsv\Concerns\FromQuery;
+use Vitorccs\LaravelCsv\Concerns\FromQueryCursor;
 use Vitorccs\LaravelCsv\Concerns\WithColumnFormatting;
 use Vitorccs\LaravelCsv\Concerns\WithHeadings;
 use Vitorccs\LaravelCsv\Concerns\WithMapping;
@@ -70,6 +72,10 @@ class Writer
             );
         }
 
+        if ($exportable instanceof FromQueryCursor) {
+            $this->iterateRows($exportable, $exportable->query()->cursor());
+        }
+
         return $this->handler->getResource();
     }
 
@@ -81,67 +87,76 @@ class Writer
      */
     private function iterateRows(object $exportable, $rows): void
     {
-        if ($rows instanceof Collection) {
-            $rows = iterator_to_array($rows->values());
-        }
-
-        if ($exportable instanceof WithMapping) {
-            $rows = array_map(fn($row) => $exportable->map($row), $rows);
-        }
-
-        $rows = array_map(function ($row) {
-            if ($row instanceof Model) {
-                $row = ModelHelper::toArrayValues($row);
-            }
-            if (is_object($row)) {
-                $row = (array)$row;
-            }
-            if (is_array($row)) {
-                $row = array_values($row);
-            }
-            return $row;
-        }, $rows);
-
-        $rows = array_map(function ($row, int $iRow) use ($exportable) {
-            return array_map(function ($column, int $iColumn) use ($exportable, $iRow) {
-                $formats = $exportable instanceof WithColumnFormatting
-                    ? $exportable->columnFormats()
-                    : [];
-                $columnLetter = CsvHelper::getColumnLetter($iColumn + 1);
-                $format = $formats[$columnLetter] ?? null;
-
-                if ($format === CellFormat::DATE) {
-
-                    $column = $this->formatter->date($column);
-                }
-
-                if ($format === CellFormat::DATETIME) {
-                    $column = $this->formatter->datetime($column);
-                }
-
-                if ($format === CellFormat::DECIMAL) {
-                    $column = $this->formatter->decimal($column);
-                }
-
-                if ($format === CellFormat::INTEGER) {
-                    $column = $this->formatter->integer($column);
-                }
-
-                try {
-                    if (!is_string($column)) {
-                        $column = (string)$column;
-                    }
-                } catch (\Throwable $e) {
-                    throw new InvalidCellValueException("{$columnLetter}{$iRow}");
-                }
-
-                return $column;
-            }, $row, array_keys($row));
-        }, $rows, array_keys($rows));
-
+        $formats = $exportable instanceof WithColumnFormatting ? $exportable->columnFormats() : [];
+        $withMapping = $exportable instanceof WithMapping;
+        $rowIndex = 1;
         foreach ($rows as $row) {
-            $this->writeRow($row);
+            $mappedRow = $withMapping ? $exportable->map($row) : $row;
+            $normalizedRow = $this->normalizeRow($mappedRow);
+            $formattedRow = $this->applyFormatting($normalizedRow, $formats, $rowIndex++);
+            $this->writeRow($formattedRow);
         }
+    }
+
+    private function normalizeRow($row): array
+    {
+        if ($row instanceof Model) {
+            $row = ModelHelper::toArrayValues($row);
+        }
+        if (is_object($row)) {
+            $row = (array)$row;
+        }
+        if (is_array($row)) {
+            $row = array_values($row);
+        }
+        return $row;
+    }
+
+    /**
+     * @throws InvalidCellValueException
+     */
+    private function applyFormatting(array $row, array $formats, int $rowIndex): array
+    {
+        return array_map(
+            fn ($value, int $columnIndex) => $this->formatCellValue($value, $formats, $rowIndex, $columnIndex),
+            $row,
+            array_keys($row)
+        );
+    }
+
+    /**
+     * @throws InvalidCellValueException
+     */
+    private function formatCellValue($value, array $formats, int $rowIndex, int $columnIndex): string
+    {
+        $columnLetter = CsvHelper::getColumnLetter($columnIndex + 1);
+        $format = $formats[$columnLetter] ?? null;
+
+        if ($format === CellFormat::DATE) {
+            return $this->formatter->date($value);
+        }
+
+        if ($format === CellFormat::DATETIME) {
+            return $this->formatter->datetime($value);
+        }
+
+        if ($format === CellFormat::DECIMAL) {
+            return $this->formatter->decimal($value);
+        }
+
+        if ($format === CellFormat::INTEGER) {
+            return $this->formatter->integer($value);
+        }
+
+        try {
+            if (! is_string($value)) {
+                return (string)$value;
+            }
+        } catch (Throwable $e) {
+            throw new InvalidCellValueException("{$columnLetter}{$rowIndex}");
+        }
+
+        return $value;
     }
 
     /**

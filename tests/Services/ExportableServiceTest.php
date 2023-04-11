@@ -12,6 +12,7 @@ use Vitorccs\LaravelCsv\Services\ExportableService;
 use Vitorccs\LaravelCsv\Tests\Data\Database\Seeders\TestUsersSeeder;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\FromArrayExport;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\FromCollectionExport;
+use Vitorccs\LaravelCsv\Tests\Data\Exports\FromQueryCursorExport;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\FromQueryExport;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\WithMappingExportSimple;
 use Vitorccs\LaravelCsv\Tests\Data\Helpers\FakerHelper;
@@ -39,6 +40,7 @@ class ExportableServiceTest extends TestCase
         $arrayExport = new FromArrayExport();
         $collectionExport = new FromCollectionExport();
         $queryExport = new FromQueryExport();
+        $queryCursorExport = new FromQueryCursorExport();
 
         $this->assertSame(
             $this->service->count($arrayExport),
@@ -54,6 +56,8 @@ class ExportableServiceTest extends TestCase
             $this->service->count($queryExport),
             TestUsersSeeder::$amount
         );
+
+        $this->assertSame(TestUsersSeeder::$amount, $this->service->count($queryCursorExport));
     }
 
     public function test_queue()
