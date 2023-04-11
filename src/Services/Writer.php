@@ -89,11 +89,11 @@ class Writer
     {
         $formats = $exportable instanceof WithColumnFormatting ? $exportable->columnFormats() : [];
         $withMapping = $exportable instanceof WithMapping;
-        $row_index = 1;
+        $rowIndex = 1;
         foreach ($rows as $row) {
             $mappedRow = $withMapping ? $exportable->map($row) : $row;
             $normalizedRow = $this->normalizeRow($mappedRow);
-            $formattedRow = $this->applyFormatting($normalizedRow, $formats, $row_index++);
+            $formattedRow = $this->applyFormatting($normalizedRow, $formats, $rowIndex++);
             $this->writeRow($formattedRow);
         }
     }
@@ -115,10 +115,10 @@ class Writer
     /**
      * @throws InvalidCellValueException
      */
-    private function applyFormatting(array $row, array $formats, int $row_index): array
+    private function applyFormatting(array $row, array $formats, int $rowIndex): array
     {
         return array_map(
-            fn ($value, int $column_index) => $this->formatCellValue($value, $formats, $row_index, $column_index),
+            fn ($value, int $columnIndex) => $this->formatCellValue($value, $formats, $rowIndex, $columnIndex),
             $row,
             array_keys($row)
         );
@@ -127,9 +127,9 @@ class Writer
     /**
      * @throws InvalidCellValueException
      */
-    private function formatCellValue($value, array $formats, int $row_index, int $column_index): string
+    private function formatCellValue($value, array $formats, int $rowIndex, int $columnIndex): string
     {
-        $columnLetter = CsvHelper::getColumnLetter($column_index + 1);
+        $columnLetter = CsvHelper::getColumnLetter($columnIndex + 1);
         $format = $formats[$columnLetter] ?? null;
 
         if ($format === CellFormat::DATE) {
@@ -153,7 +153,7 @@ class Writer
                 return (string)$value;
             }
         } catch (Throwable $e) {
-            throw new InvalidCellValueException("{$columnLetter}{$row_index}");
+            throw new InvalidCellValueException("{$columnLetter}{$rowIndex}");
         }
 
         return $value;
