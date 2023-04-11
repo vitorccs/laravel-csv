@@ -4,14 +4,14 @@ namespace Vitorccs\LaravelCsv\Tests\Data\Exports;
 
 use Vitorccs\LaravelCsv\Concerns\Exportable;
 use Vitorccs\LaravelCsv\Concerns\FromQuery;
-use Vitorccs\LaravelCsv\Tests\Data\Stubs\TestUser;
+use Illuminate\Support\Facades\DB;
 
-class FromQueryExport implements FromQuery
+class FromQueryBuilderExport implements FromQuery
 {
     use Exportable;
 
     public function query()
     {
-        return TestUser::query();
+        return DB::table('test_users');
     }
 }

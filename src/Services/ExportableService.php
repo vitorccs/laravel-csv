@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Vitorccs\LaravelCsv\Concerns\FromArray;
 use Vitorccs\LaravelCsv\Concerns\FromCollection;
 use Vitorccs\LaravelCsv\Concerns\FromQuery;
-use Vitorccs\LaravelCsv\Concerns\FromQueryCursor;
 use Vitorccs\LaravelCsv\Entities\CsvConfig;
 use Vitorccs\LaravelCsv\Exceptions\InvalidCellValueException;
 use Vitorccs\LaravelCsv\Handlers\ArrayHandler;
@@ -63,7 +62,7 @@ class ExportableService
             return $exportable->collection()->count();
         }
 
-        if ($exportable instanceof FromQuery || $exportable instanceof FromQueryCursor) {
+        if ($exportable instanceof FromQuery) {
             return $exportable->query()->count();
         }
 

@@ -11,7 +11,7 @@ The memory usage is optimized in this project by retrieving small chunks of resu
 This project is using some of Laravel-Excel design principles because it is both a solid work and a reference, and by doing that, it also reduces the learning curve and adoption to this library.
 
 # Requirements
-* PHP >= 7.4
+* PHP >= 8.0
 * Laravel >= 6.x
 
 # Installation
@@ -27,9 +27,9 @@ php artisan vendor:publish --provider="Vitorccs\LaravelCsv\ServiceProviders\CsvS
 
 Step 3) Edit your local `config\csv.php` file per your project preferences
 
-Step 4) Create an Export class file as show below.
+Step 4) Create an Export class file as shown below
 
-Note: you may implement _FromArray_, _FromCollection_ or _FromQuery_
+Note: you may implement _FromArray_, _FromCollection_ or _FromQuery_ 
 
 ```php
 namespace App\Exports;
@@ -77,6 +77,7 @@ $filename = CsvHelper::filename();
 ```
 
 # Data sources
+Note: only `FromQuery` can chunk results per `chunk_size` parameter from config file.
 
 ## Laravel Eloquent Query Builder
 ```php
@@ -121,7 +122,6 @@ class MyQueryExport implements FromQuery
 ```php
 namespace App\Exports;
 
-use Illuminate\Support\Collection;
 use Vitorccs\LaravelCsv\Concerns\Exportable;
 use Vitorccs\LaravelCsv\Concerns\FromCollection;
 
@@ -129,13 +129,32 @@ class MyCollectionExport implements FromCollection
 {
     use Exportable;
     
-    public function collection(): Collection
+    public function collection()
     {
         return collect([
             ['a1', 'b1', 'c1'],
             ['a2', 'b2', 'c2'],
             ['a3', 'b3', 'c3']
         ]);
+    }
+}
+```
+
+## Laravel LazyCollection
+```php
+namespace App\Exports;
+
+use App\User;
+use Vitorccs\LaravelCsv\Concerns\Exportable;
+use Vitorccs\LaravelCsv\Concerns\FromCollection;
+
+class MyQueryExport implements FromCollection
+{
+    use Exportable;
+    
+    public function collection()
+    {
+        return User::cursor();
     }
 }
 ```

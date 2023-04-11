@@ -2,12 +2,10 @@
 
 namespace Vitorccs\LaravelCsv\Helpers;
 
-use Carbon\Carbon;
-
 class FormatterHelper
 {
     /**
-     * @param Carbon|\DateTime|string $date
+     * @param \DateTime|string $date
      * @param string $format
      * @return string
      */
@@ -21,7 +19,7 @@ class FormatterHelper
     }
 
     /**
-     * @param int|float|string $number
+     * @param float|int|string $number
      * @param int $decimals
      * @param string $decimalSep
      * @param string $thousandsSep
