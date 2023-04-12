@@ -2,7 +2,6 @@
 
 namespace Vitorccs\LaravelCsv\Services;
 
-use Carbon\Carbon;
 use Vitorccs\LaravelCsv\Entities\CsvConfig;
 use Vitorccs\LaravelCsv\Helpers\FormatterHelper;
 
@@ -22,7 +21,7 @@ class FormatterService
     }
 
     /**
-     * @param Carbon|\DateTime|string $date
+     * @param \DateTime|string $date
      * @return string
      */
     public function date($date): string
@@ -31,7 +30,7 @@ class FormatterService
     }
 
     /**
-     * @param Carbon|\DateTime|string $date
+     * @param \DateTime|string $date
      * @return string
      */
     public function datetime($date): string

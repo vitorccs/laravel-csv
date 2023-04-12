@@ -3,10 +3,10 @@
 namespace Vitorccs\LaravelCsv\Tests\Data\Exports;
 
 use Vitorccs\LaravelCsv\Concerns\Exportable;
-use Vitorccs\LaravelCsv\Concerns\FromQueryCursor;
+use Vitorccs\LaravelCsv\Concerns\FromQuery;
 use Vitorccs\LaravelCsv\Tests\Data\Stubs\TestUser;
 
-class FromQueryCursorExport implements FromQueryCursor
+class FromEloquentBuilderExport implements FromQuery
 {
     use Exportable;
 

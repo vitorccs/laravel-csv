@@ -12,8 +12,9 @@ use Vitorccs\LaravelCsv\Services\ExportableService;
 use Vitorccs\LaravelCsv\Tests\Data\Database\Seeders\TestUsersSeeder;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\FromArrayExport;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\FromCollectionExport;
-use Vitorccs\LaravelCsv\Tests\Data\Exports\FromQueryCursorExport;
-use Vitorccs\LaravelCsv\Tests\Data\Exports\FromQueryExport;
+use Vitorccs\LaravelCsv\Tests\Data\Exports\FromCursorExport;
+use Vitorccs\LaravelCsv\Tests\Data\Exports\FromEloquentBuilderExport;
+use Vitorccs\LaravelCsv\Tests\Data\Exports\FromQueryBuilderExport;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\WithMappingExportSimple;
 use Vitorccs\LaravelCsv\Tests\Data\Helpers\FakerHelper;
 use Vitorccs\LaravelCsv\Tests\TestCase;
@@ -39,25 +40,46 @@ class ExportableServiceTest extends TestCase
     {
         $arrayExport = new FromArrayExport();
         $collectionExport = new FromCollectionExport();
-        $queryExport = new FromQueryExport();
-        $queryCursorExport = new FromQueryCursorExport();
+        $databaseExports = [
+            new FromEloquentBuilderExport(),
+            new FromQueryBuilderExport(),
+            new FromCursorExport()
+        ];
 
         $this->assertSame(
-            $this->service->count($arrayExport),
-            count($arrayExport->array())
+            count($arrayExport->array()),
+            $this->service->count($arrayExport)
         );
 
         $this->assertSame(
-            $this->service->count($collectionExport),
-            $collectionExport->collection()->count()
+            $collectionExport->collection()->count(),
+            $this->service->count($collectionExport)
         );
 
-        $this->assertSame(
-            $this->service->count($queryExport),
-            TestUsersSeeder::$amount
-        );
+        foreach ($databaseExports as $export) {
+            $this->assertSame(
+                TestUsersSeeder::$amount,
+                $this->service->count($export)
+            );
+        }
+    }
 
-        $this->assertSame(TestUsersSeeder::$amount, $this->service->count($queryCursorExport));
+    public function test_limit()
+    {
+        $exports = [
+            $this->getExportMock(FromArrayExport::class),
+            $this->getExportMock(FromCollectionExport::class),
+            $this->getExportMock(FromCursorExport::class),
+            $this->getExportMock(FromQueryBuilderExport::class),
+            $this->getExportMock(FromEloquentBuilderExport::class),
+        ];
+
+        foreach ($exports as $export) {
+            $this->assertSame(
+                $export->limit(),
+                count($this->service->array($export))
+            );
+        }
     }
 
     public function test_queue()
@@ -142,5 +164,18 @@ class ExportableServiceTest extends TestCase
         $contents = $this->readFromDisk($filename, $csvConfig);
 
         $this->assertEquals($contents, $export->array());
+    }
+
+    private function getExportMock(string $abstractClass, int $limit = 5)
+    {
+        $mock = $this->getMockForAbstractClass(
+            $abstractClass,
+            mockedMethods: ['limit']
+        );
+
+        $mock->method('limit')
+            ->willReturn($limit);
+
+        return $mock;
     }
 }
