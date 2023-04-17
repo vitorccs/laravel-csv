@@ -170,7 +170,12 @@ class ExportableServiceTest extends TestCase
     {
         $mock = $this->getMockForAbstractClass(
             $abstractClass,
-            mockedMethods: ['limit']
+            [],
+            '',
+            true,
+            true,
+            true,
+            ['limit']
         );
 
         $mock->method('limit')
