@@ -11,7 +11,7 @@ The memory usage is optimized in this project by retrieving small chunks of resu
 This project is using some of Laravel-Excel design principles because it is both a solid work and a reference, and by doing that, it also reduces the learning curve and adoption to this library.
 
 # Requirements
-* PHP >= 8.0
+* PHP >= 7.4
 * Laravel >= 6.x
 
 # Installation

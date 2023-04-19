@@ -102,7 +102,7 @@ class Writer
      * @param mixed $row
      * @return array
      */
-    private function normalizeRow(mixed $row): array
+    private function normalizeRow($row): array
     {
         if ($row instanceof Model) {
             $row = ModelHelper::toArrayValues($row);
@@ -137,7 +137,7 @@ class Writer
     /**
      * @throws InvalidCellValueException
      */
-    private function formatCellValue(mixed $value,
+    private function formatCellValue($value,
                                      array $formats,
                                      int   $rowIndex,
                                      int   $columnIndex): string
