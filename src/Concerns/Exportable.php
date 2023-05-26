@@ -56,6 +56,16 @@ trait Exportable
     }
 
     /**
+     * @param  bool  $asString
+     *
+     * @return mixed
+     */
+    public function stream(bool $asString = false): mixed
+    {
+        return CsvExporter::stream($this, $asString);
+    }
+
+    /**
      * @param string|null $filename
      * @param string|null $disk
      * @param array $diskOptions

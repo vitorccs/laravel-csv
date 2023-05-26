@@ -86,6 +86,23 @@ class CsvExporter
     }
 
     /**
+     * @param  object  $exportable
+     * @param  bool  $asString
+     *
+     * @throws InvalidCellValueException
+     */
+    public function stream(object $exportable, bool $asString = false)
+    {
+        $streamResponse = $this->service->stream($exportable);
+
+        if ($asString) {
+            return stream_get_contents($streamResponse);
+        }
+
+        return $streamResponse;
+    }
+
+    /**
      * @param object $exportable
      * @param string $filename
      * @param string|null $disk
