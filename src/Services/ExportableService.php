@@ -120,6 +120,16 @@ class ExportableService
     }
 
     /**
+     * @param  object  $exportable
+     *
+     * @throws InvalidCellValueException
+     */
+    public function stream(object $exportable)
+    {
+        return $this->getStream($exportable);
+    }
+
+    /**
      * @param object $exportable
      * @param string $filename
      * @param string|null $disk
