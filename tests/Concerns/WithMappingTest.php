@@ -4,6 +4,7 @@ namespace Vitorccs\LaravelCsv\Tests\Concerns;
 
 use Vitorccs\LaravelCsv\Tests\Data\Database\Seeders\TestCsvSeeder;
 use Vitorccs\LaravelCsv\Tests\Data\Exports\WithMappingExport;
+use Vitorccs\LaravelCsv\Tests\Data\Exports\WithMappingMultipleRowsExport;
 use Vitorccs\LaravelCsv\Tests\Data\Imports\WithMappingImport;
 use Vitorccs\LaravelCsv\Tests\TestCase;
 
@@ -34,5 +35,15 @@ class WithMappingTest extends TestCase
         $expected = $import->expected();
 
         $this->assertSame($rows, $expected);
+    }
+
+    public function test_export_mapping_multiple_rows()
+    {
+        $export = new WithMappingMultipleRowsExport();
+
+        $export->store($this->filename);
+        $actual = $this->getFromDisk($this->filename);
+
+        $this->assertSame($export->expected(), $actual);
     }
 }
