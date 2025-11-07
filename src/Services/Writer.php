@@ -92,10 +92,16 @@ class Writer
 
         foreach ($rows as $index => $row) {
             $mappedRow = $withMapping ? $exportable->map($row) : $row;
-            $normalizedRow = $this->normalizeRow($mappedRow);
-            $formattedRow = $this->applyFormatting($normalizedRow, $formats, $index);
 
-            $this->writeRow($formattedRow);
+            $firstElement = is_array($mappedRow) ? reset($mappedRow) : null;
+            
+            if ($withMapping && is_array($firstElement)) {
+                foreach ($mappedRow as $subRow) {
+                    $this->processAndWriteRow($subRow, $formats, $index);
+                }
+            } else {
+                $this->processAndWriteRow($mappedRow, $formats, $index);
+            }
         }
     }
 
@@ -176,6 +182,20 @@ class Writer
         }
 
         return $value;
+    }
+
+    /**
+     * @param mixed $row
+     * @param array $formats
+     * @param int $rowIndex
+     * @return void
+     * @throws InvalidCellValueException
+     */
+    protected function processAndWriteRow(mixed $row, array $formats, int $rowIndex): void
+    {
+        $normalizedRow = $this->normalizeRow($row);
+        $formattedRow = $this->applyFormatting($normalizedRow, $formats, $rowIndex);
+        $this->writeRow($formattedRow);
     }
 
     /**
